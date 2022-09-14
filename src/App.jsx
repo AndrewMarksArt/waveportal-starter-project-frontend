@@ -7,8 +7,40 @@ import abi from "./utils/WavePortal.json";
 const App = () => {
 
   const [currentAccount, setCurrentAccount] = useState("");
+  const [allWaves, setAllWaves] = useState([]);
   const contractAddress = "";
   const contractABI = abi.abi;
+
+  const getAllWaves = async () => {
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const wavePortalContract = new ethers.Contract(contract.address, contractABI, signer);
+
+        const waves = await wavePortalContract.getAllWaves();
+
+        // using all waves from getAllWaves, 
+        // add waver address, timestamp, message to new array
+        let wavesCleaned = [];
+        waves.forEach(wave => {
+          wavesCleaned.push({
+            address: wave.waver,
+            timestamp: new Date(wave.timestamp *1000),
+            message: wave.message
+          });
+        });
+
+        // Store cleaned waves in React State
+        setAllWaves(wavesCleaned);
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
   
   const checkIfWalletIsConnected = async () => {
       try{
@@ -29,6 +61,8 @@ const App = () => {
         } else {
           console.log("no authorized account found");
         }
+
+        const allWaves = getAllWaves();        
         
       } catch (error) {
         console.log(error);
@@ -65,7 +99,7 @@ const App = () => {
         let count = await wavePortalContract.getTotalWaves();
         console.lor("retrieved total wave count: ", count.toNumber());
 
-        const waveTxn = await wavePortalContract.wave();
+        const waveTxn = await wavePortalContract.wave("this is a message");
         console.log("Mining...: ", waveTxn.hash);
 
         await waveTxn.wait();
@@ -104,7 +138,16 @@ const App = () => {
           <button className="connectButton" onClick={connectWallet}>
             Connect Wallet
           </button>
-      )}
+        )}
+
+        {allWaves.map((wave, index) => {
+          return (
+            <div key={index} style={{ backgroundColor: "Oldlace", marginTop: "16px", padding: "8px" }}>
+              <div> Address: {wave.address} </div>
+              <div> Time: {wave.timestamp.toString()} </div>
+              <div> Message: {wave.message} </div>
+            </div>)
+        })}
       </div>
     </div>
   );
