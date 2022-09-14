@@ -34,3 +34,13 @@
   background-color: #4d2f92;
   color: #e6d4ec;
 }
+
+.connectButton {
+  cursor: pointer;
+  margin-top: 16px;
+  padding: 8px;
+  border:0;
+  border-radius: 20px;
+  background-color: #921771;
+  color: #e6d4ec;
+}
